@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/MDinesh28/Terraform-cicd-pipeline.git'
+            }
+        }
+
+        stage('Install Terraform') {
+            steps {
+                sh '''
+                sudo yum install -y yum-utils shadow-utils
+                sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+                sudo yum -y install terraform
+                '''
+            }
+        }
+
+        stage('Initialize Terraform') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+
+        stage('Apply Terraform Plan') {
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                echo "Checking if EC2 instance is running..."
+                aws ec2 describe-instances --filters "Name=tag:Name,Values=MyTerraformInstance" --query "Reservations[].Instances[].State.Name" --output text
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
