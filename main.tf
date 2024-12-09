@@ -1,4 +1,3 @@
-# provider configuration
 provider "aws" {
   region = "ap-south-1"
 }
@@ -45,14 +44,16 @@ resource "aws_security_group" "my_sg" {
 
 # Launch an EC2 instance
 resource "aws_instance" "my_instance" {
-  ami           = "ami-0327f51db613d7bd2" # Replace with a valid AMI ID for your region
+  ami           = "ami-0c55b159cbfafe1f0"  # Example for Amazon Linux 2 in ap-south-1
   instance_type = "t2.micro"
 
-  subnet_id          = aws_subnet.my_subnet.id
-  security_groups    = [aws_security_group.my_sg.name]
+  subnet_id                = aws_subnet.my_subnet.id
+  security_groups          = [aws_security_group.my_sg.name]
   associate_public_ip_address = true
 
   tags = {
     Name = "MyTerraformInstance"
   }
+
+  depends_on = [aws_security_group.my_sg, aws_subnet.my_subnet]
 }
